@@ -31,13 +31,13 @@ $list-bg-color: #ebecf0;
         border-top-left-radius: 5px;
         border-top-right-radius: 5px;
     }
-    ul.task-list{
+    ul.card-list{
         list-style-type: none;
         margin: 0;
         max-height: calc(100% - #{$column-header-height} - #{$column-footer-height});
         overflow-y: auto;
         &::-webkit-scrollbar{
-            -webkit-appearance: none; // hien thi thanh keo
+            -webkit-appearance: none; // hien thi thanh keo//
         }
         &::-webkit-scrollbar:vertical{
             width: 11px;
