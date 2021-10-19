@@ -6,6 +6,7 @@ $appbar-bg-color: #0067a3;
 
 
 .navbar-app{
+    height: $navbar-app-height ;
     background-color: $appbar-bg-color;
     padding-left: $gap;
     display: flex;
