@@ -5,7 +5,7 @@
 
 .board-content{
     height: $board-content-height;
-    // display: flex;
+    display: flex;
     // margin: 0 $gap $gap ;
     overflow-x: auto;
     overflow-y: hidden;
@@ -23,6 +23,22 @@
         background-color: rgba(150, 150, 200, 0.1);
         border: 1px dashed #abc;
         margin: 5px 45px 5px 5px;
+        border-radius: $column-border-radius;
       }
+    .add-new-column{
+        margin-left: $gap;
+        width: 250px;
+        height: 32px;
+        line-height: 32px;
+        cursor: pointer;
+        padding: 4px 0 4px 15px;
+        color: white;
+        font-size: 15px;
+        background-color: hsla(0, 0%, 100%, .24);
+        border-radius: $column-border-radius;
+        &:hover{
+            background-color: hsla(0, 0%, 100%, .34);
+        }
+    }
     
 }
