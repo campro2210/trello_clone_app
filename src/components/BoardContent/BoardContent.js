@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Container, Draggable } from 'react-smooth-dnd'
 import { Container as BootstrapContainer, Row, Col, Form, Button } from 'react-bootstrap'
 import { isEmpty } from 'lodash'
@@ -18,11 +18,13 @@ function BoardContent() {
   const [columns, setColumns] = useState([])
   const [openNewColumnForm, setOpenNewColumnForm ] = useState(false)
 
+  const toggleOpenNewColumnForm = () => setOpenNewColumnForm(!openNewColumnForm)
+
   const newColumnInputRef = useRef(null)
 
   const [ newColumnTitle, setNewColumnTitle ] = useState('')
 
-  const onNewColumnTitleChange = useCallback((e) => setNewColumnTitle(e.target.value), [])
+  const onNewColumnTitleChange = (e) => setNewColumnTitle(e.target.value)
 
   useEffect(() => {
     const boardFromDB =initialData.boards.find(board => {
@@ -73,7 +75,6 @@ function BoardContent() {
     }
   }
 
-  const toggleOpenNewColumnForm = () => setOpenNewColumnForm(!openNewColumnForm)
 
   const addNewColumn = () => {
     if (!newColumnTitle) {
@@ -107,12 +108,14 @@ function BoardContent() {
   const onUpdateColumn =(newColumnToUpdate) => {
     const columnIdToUpdate = newColumnToUpdate.id
     let newColumns =[...columns]
-    const columnIndexToUpdate = newColumns.findIndex(i => i.id === columnIdToUpdate.id)
+    const columnIndexToUpdate = newColumns.findIndex(i => i.id === columnIdToUpdate)
 
     if (newColumnToUpdate._detroy) {
       newColumns.splice(columnIndexToUpdate, 1)
     } else {
+
       newColumns.splice(columnIndexToUpdate, 1, newColumnToUpdate)
+
     }
 
 
@@ -140,7 +143,11 @@ function BoardContent() {
       >
         {columns.map((column, index) => (
           <Draggable key = {index}>
-            <Column column ={column} onCardDrop={onCardDrop} onUpdateColumn={onUpdateColumn} />
+            <Column column ={column}
+              onCardDrop={onCardDrop}
+              onUpdateColumn={onUpdateColumn}
+
+            />
           </Draggable>
         ))}
       </Container>
@@ -167,7 +174,7 @@ function BoardContent() {
               onKeyDown={event => (event.key === 'Enter') && addNewColumn()}
             />
             <Button as={Col} variant="success" size="sm" onClick={addNewColumn}>Add new column</Button>
-            <span className="cancel-new-column" onClick={toggleOpenNewColumnForm}>
+            <span className="cancel-icon" onClick={toggleOpenNewColumnForm}>
               <i className=" fa fa-trash icon"></i>
             </span>
           </Col>

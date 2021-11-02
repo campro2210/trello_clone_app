@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, useRef } from 'react'
 import { Container, Draggable } from 'react-smooth-dnd'
-import { Dropdown, Form } from 'react-bootstrap'
+import { Dropdown, Form, Button, Col } from 'react-bootstrap'
+import { cloneDeep } from 'lodash'
 
 
-import { MODAL_ACTION_CLOSE, MODAL_ACTION_CONFIRM } from 'ultilities/constants'
+import { MODAL_ACTION_CONFIRM } from 'ultilities/constants'
 import { saveContentAfterPressEnter, selectAllInlineText } from 'ultilities/contentEditable'
 
 
@@ -38,21 +39,60 @@ function Column(props) {
 
   const [columnTitle, setColumnTitle] = useState('')
 
+  const [ newCardTitle, setNewCardTitle ] = useState('')
+
+
+  const onNewCardTitleChange = (e) => setNewCardTitle(e.target.value)
   const handleColumnTitleChange = useCallback((e) => setColumnTitle(e.target.value), [])
+
+  const [openNewCardForm, setOpenNewCardForm ] = useState(false)
+
+  const toggleOpenNewCardForm = () => setOpenNewCardForm(!openNewCardForm)
+
+  const newCardTextAreaRef = useRef(null)
 
   useEffect(() => {
 
     setColumnTitle(column.title)
   }, [column.title] )
 
+  useEffect(() => {
+    if ( newCardTextAreaRef && newCardTextAreaRef.current) {
+      newCardTextAreaRef.current.focus()
+      newCardTextAreaRef.current.select()
+    }
+  }, [openNewCardForm])
+
 
   const handleColumnTitleBlur =() => {
-    console.log(columnTitle)
     const newColumn = {
       ...column,
       title: columnTitle
     }
     onUpdateColumn(newColumn)
+  }
+
+  const addNewCard = () => {
+    if (!newCardTitle) {
+      newCardTextAreaRef.current.focus()
+      return
+    }
+    const newCardToAdd = {
+      id: Math.random().toString(36).substr(2, 5), // 5 random characters, will remove wwhen we implement code api
+      boardId: column.boardId,
+      title: newCardTitle.trim(),
+      columnId: column.id,
+      cover: null
+    }
+    let newColumn = cloneDeep(column)
+    newColumn.cards.push(newCardToAdd)
+    newColumn.cardOrder.push(newCardToAdd.id)
+
+    onUpdateColumn(newColumn)
+    setNewCardTitle('')
+    toggleOpenNewCardForm()
+
+
   }
 
 
@@ -75,7 +115,7 @@ function Column(props) {
             onKeyDown={saveContentAfterPressEnter}
             onClick={selectAllInlineText}
             onMouseDown={e => e.preventDefault()}
-          // onKeyDown={event => (event.key === 'Enter') && addNewColumn()}
+            // onKeyDown={event => (event.key === 'Enter') && addNewCard()}
           />
         </div>
         <div className="column-dropdown-actions">
@@ -84,7 +124,7 @@ function Column(props) {
 
 
             <Dropdown.Menu>
-              <Dropdown.Item >Add card ...</Dropdown.Item>
+              <Dropdown.Item onClick={toggleOpenNewCardForm} >Add card ...</Dropdown.Item>
               <Dropdown.Item onClick={toggleShowConfirmModal}>Remove column...</Dropdown.Item>
               <Dropdown.Item >Move all cards in thiscolumn (beta)</Dropdown.Item>
               <Dropdown.Item >Archive all cards in thiscolumn (beta)</Dropdown.Item>
@@ -116,11 +156,35 @@ function Column(props) {
             </Draggable>
           ))}
         </Container>
+        {openNewCardForm &&
+         <div className="add-new-card-area">
+           <Form.Control
+             size="sm"
+             as ="textarea"
+             rows="3"
+             placeholder="enter title for this card..."
+             className="textarea-enter-new-card"
+             ref={newCardTextAreaRef}
+             value ={ newCardTitle}
+             onChange ={onNewCardTitleChange}
+             onKeyDown={event => (event.key === 'Enter') && addNewCard() }
+           />
+         </div>
+        }
       </div>
       <footer>
-        <div className="footer-actions">
+        {openNewCardForm &&
+           <><Button as={Col} variant="success" size="sm" onClick={addNewCard}>Add card</Button>
+             <span className="cancel-icon" onClick={toggleOpenNewCardForm}>
+               <i className=" fa fa-trash icon" ></i>
+             </span></>
+
+        }
+        {!openNewCardForm &&
+        <div className="footer-actions" onClick ={toggleOpenNewCardForm}>
           <i className=" fa fa-plus icon"> </i> Add another card
         </div>
+        }
 
       </footer>
 
