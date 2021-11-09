@@ -28,7 +28,7 @@ export const initialData ={
           id: 'column-2',
           boardId:'board-1',
           title: 'Progress column',
-          cardOrder: ['column-7', 'column-8', 'column-9'],
+          cardOrder: ['card-7', 'card-8', 'card-9'],
           cards:[
             { id: 'card-7', boardId:'board-1', columnId: 'column-2', title:'title of card 7', cover: null },
             { id: 'card-8', boardId:'board-1', columnId: 'column-2', title:'title of card 8', cover: null },
@@ -39,7 +39,7 @@ export const initialData ={
           id: 'column-3',
           boardId:'board-1',
           title: 'done column',
-          cardOrder: ['column-10', 'column-11', 'column-12'],
+          cardOrder: ['card-10', 'card-11', 'card-12'],
           cards:[
             { id: 'card-10', boardId:'board-1', columnId: 'column-3', title:'title of card 10', cover: null },
             { id: 'card-11', boardId:'board-1', columnId: 'column-3', title:'title of card 11', cover: null },
