@@ -109,11 +109,7 @@ function Column(props) {
       toggleOpenNewCardForm()
     })
     
-
-
   }
-
-
   return (
 
     <div className="column">
