@@ -11,7 +11,8 @@ import { mapOrder } from 'ultilities/sorts'
 
 import { applyDrag } from 'ultilities/dragDrop'
 
-import { initialData } from 'actions/initialData'
+
+import { fetchBoardDetails, createNewColumn } from 'actions/callAPI/index'
 
 function BoardContent() {
   const [board, setBoard] = useState({})
@@ -25,14 +26,16 @@ function BoardContent() {
   const onNewColumnTitleChange = useCallback((e) => setNewColumnTitle(e.target.value), [])
 
   useEffect(() => {
-    const boardFromDB =initialData.boards.find(board => {
-      return board.id === 'board-1'
-    })
-    if (boardFromDB) {
-      setBoard(boardFromDB)
+
+    const boardId = '619287af27f7001bd2c5a574'
+    fetchBoardDetails(boardId).then(board => {
+      console.log(board)
+      setBoard(board)
       //sort column
-      setColumns( mapOrder(boardFromDB.columns, boardFromDB.columnOrder, 'id' ))
-    }
+      setColumns( mapOrder(board.columns, board.columnOrder, '_id' ))
+    })
+
+
   }, [])
   useEffect(() => {
     if ( newColumnInputRef && newColumnInputRef.current) {
@@ -50,7 +53,7 @@ function BoardContent() {
     newColumns = applyDrag(newColumns, dropResult)
 
     let newBoard = { ...board }
-    newBoard.columnOrder = newColumns.map(c => c.id)
+    newBoard.columnOrder = newColumns.map(c => c._id)
     newBoard.columns = newColumns
 
 
@@ -62,11 +65,11 @@ function BoardContent() {
     if (dropResult.removedIndex !== null || dropResult.addedIndex !== null) {
       let newColumns = [...columns]
 
-      let currentColumn = newColumns.find(c => c.id === columnId)
+      let currentColumn = newColumns.find(c => c._id === columnId)
       currentColumn.cards = applyDrag(currentColumn.cards, dropResult)
 
 
-      currentColumn.cardOrder = currentColumn.cards.map(c => c.id)
+      currentColumn.cardOrder = currentColumn.cards.map(c => c._id)
 
 
       setColumns(newColumns)
@@ -82,34 +85,33 @@ function BoardContent() {
     }
 
     const newColumnToAdd = {
-      id: Math.random().toString(36).substr(2, 5), // 5 random characters, will remove wwhen we implement code api
-      boardID: board.id,
-      title: newColumnTitle.trim(),
-      cardOrder: [],
-      cards: []
+      boardId: board._id,
+      title: newColumnTitle.trim()
     }
 
-    let newColumns = [...columns]
-    newColumns.push(newColumnToAdd)
-
-    let newBoard = { ...board }
-    newBoard.columnOrder = newColumns.map(c => c.id)
-    newBoard.columns = newColumns
-
-
-    setColumns(newColumns)
-    setBoard(newBoard)
-    setNewColumnTitle('')
-    toggleOpenNewColumnForm()
+    createNewColumn(newColumnToAdd).then(column => {
+      let newColumns = [...columns]
+      newColumns.push(column)
+  
+      let newBoard = { ...board }
+      newBoard.columnOrder = newColumns.map(c => c._id)
+      newBoard.columns = newColumns
+  
+  
+      setColumns(newColumns)
+      setBoard(newBoard)
+      setNewColumnTitle('')
+      toggleOpenNewColumnForm()
+    })
 
   }
 
-  const onUpdateColumn =(newColumnToUpdate) => {
-    const columnIdToUpdate = newColumnToUpdate.id
+  const onUpdateColumnState =(newColumnToUpdate) => {
+    const columnIdToUpdate = newColumnToUpdate._id
     let newColumns =[...columns]
-    const columnIndexToUpdate = newColumns.findIndex(i => i.id === columnIdToUpdate.id)
+    const columnIndexToUpdate = newColumns.findIndex(i => i._id === columnIdToUpdate)
 
-    if (newColumnToUpdate._detroy) {
+    if (newColumnToUpdate._destroy) {
       newColumns.splice(columnIndexToUpdate, 1)
     } else {
       newColumns.splice(columnIndexToUpdate, 1, newColumnToUpdate)
@@ -117,7 +119,7 @@ function BoardContent() {
 
 
     let newBoard = { ...board }
-    newBoard.columnOrder = newColumns.map(c => c.id)
+    newBoard.columnOrder = newColumns.map(c => c._id)
     newBoard.columns = newColumns
 
 
@@ -140,7 +142,7 @@ function BoardContent() {
       >
         {columns.map((column, index) => (
           <Draggable key = {index}>
-            <Column column ={column} onCardDrop={onCardDrop} onUpdateColumn={onUpdateColumn} />
+            <Column column ={column} onCardDrop={onCardDrop} onUpdateColumnState={onUpdateColumnState} />
           </Draggable>
         ))}
       </Container>

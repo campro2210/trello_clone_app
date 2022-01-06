@@ -1,10 +1,13 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, useRef } from 'react'
 import { Container, Draggable } from 'react-smooth-dnd'
-import { Dropdown, Form } from 'react-bootstrap'
+import { Dropdown, Form, Button, Col } from 'react-bootstrap'
+import { cloneDeep } from 'lodash'
 
 
-import { MODAL_ACTION_CLOSE, MODAL_ACTION_CONFIRM } from 'ultilities/constants'
+import { MODAL_ACTION_CONFIRM } from 'ultilities/constants'
 import { saveContentAfterPressEnter, selectAllInlineText } from 'ultilities/contentEditable'
+import { createNewCard, updateColumn } from 'actions/callAPI'
+
 
 
 import './Column.scss'
@@ -17,20 +20,24 @@ import ConfirmModal from 'components/Common/confirmModal'
 
 
 function Column(props) {
-  const { column, onCardDrop, onUpdateColumn } = props
-  const cards = mapOrder(column.cards, column.cardOrder, 'id')
+  const { column, onCardDrop, onUpdateColumnState } = props
+  const cards = mapOrder(column.cards, column.cardOrder, '_id')
 
   const [ showConfirmModal, setShowConfirmModal] = useState(false)
 
   const toggleShowConfirmModal = () => setShowConfirmModal(!showConfirmModal)
-
+  // Remove column
   const onConfirmModalAction =(type ) => {
     if (type === MODAL_ACTION_CONFIRM) {
       const newColumn = {
         ...column,
-        _detroy:true
+        _destroy:true
       }
-      onUpdateColumn(newColumn)
+       // Call api
+       updateColumn(newColumn._id, newColumn).then(updatedColumn => {
+        onUpdateColumnState(updatedColumn)
+      })
+   
 
     }
     toggleShowConfirmModal()
@@ -38,21 +45,72 @@ function Column(props) {
 
   const [columnTitle, setColumnTitle] = useState('')
 
+  const [ newCardTitle, setNewCardTitle ] = useState('')
+
+
+  const onNewCardTitleChange = (e) => setNewCardTitle(e.target.value)
   const handleColumnTitleChange = useCallback((e) => setColumnTitle(e.target.value), [])
+
+  const [openNewCardForm, setOpenNewCardForm ] = useState(false)
+
+  const toggleOpenNewCardForm = () => setOpenNewCardForm(!openNewCardForm)
+
+  const newCardTextAreaRef = useRef(null)
 
   useEffect(() => {
 
     setColumnTitle(column.title)
   }, [column.title] )
 
+  useEffect(() => {
+    if ( newCardTextAreaRef && newCardTextAreaRef.current) {
+      newCardTextAreaRef.current.focus()
+      newCardTextAreaRef.current.select()
+    }
+  }, [openNewCardForm])
 
+ // Update column title
   const handleColumnTitleBlur =() => {
-    console.log(columnTitle)
     const newColumn = {
       ...column,
       title: columnTitle
     }
-    onUpdateColumn(newColumn)
+    console.log(column.title)
+    console.log(newColumn.title)
+    if(column.title !== newColumn.title) {
+      // Call api
+      updateColumn(newColumn._id, newColumn).then(updatedColumn => {
+        updateColumn.cards = newColumn.cards
+        onUpdateColumnState(updatedColumn)
+      })
+    }
+    
+    
+   
+  }
+
+  const addNewCard = () => {
+    if (!newCardTitle) {
+      newCardTextAreaRef.current.focus()
+      return
+    }
+    const newCardToAdd = {
+      boardId: column.boardId,
+      title: newCardTitle.trim(),
+      columnId: column._id
+    }
+    createNewCard(newCardToAdd).then(card => {
+      let newColumn = cloneDeep(column)
+      newColumn.cards.push(card)
+      newColumn.cardOrder.push(card._id)
+  
+      onUpdateColumnState(newColumn)
+      setNewCardTitle('')
+      toggleOpenNewCardForm()
+    })
+    
+
+
   }
 
 
@@ -75,7 +133,7 @@ function Column(props) {
             onKeyDown={saveContentAfterPressEnter}
             onClick={selectAllInlineText}
             onMouseDown={e => e.preventDefault()}
-          // onKeyDown={event => (event.key === 'Enter') && addNewColumn()}
+            // onKeyDown={event => (event.key === 'Enter') && addNewCard()}
           />
         </div>
         <div className="column-dropdown-actions">
@@ -84,9 +142,9 @@ function Column(props) {
 
 
             <Dropdown.Menu>
-              <Dropdown.Item >Add card ...</Dropdown.Item>
+              <Dropdown.Item onClick={toggleOpenNewCardForm} >Add card ...</Dropdown.Item>
               <Dropdown.Item onClick={toggleShowConfirmModal}>Remove column...</Dropdown.Item>
-              <Dropdown.Item >Move all cards in thiscolumn (beta)</Dropdown.Item>
+              <Dropdown.Item >Move all cards in this column (beta)</Dropdown.Item>
               <Dropdown.Item >Archive all cards in thiscolumn (beta)</Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
@@ -98,7 +156,7 @@ function Column(props) {
         <Container
 
           groupName="col"
-          onDrop={dropResult => onCardDrop(column.id, dropResult)}
+          onDrop={dropResult => onCardDrop(column._id, dropResult)}
           getChildPayload={index => cards[index]}
           dragClass="card-ghost"
           dropClass="card-ghost-drop"
@@ -116,11 +174,35 @@ function Column(props) {
             </Draggable>
           ))}
         </Container>
+        {openNewCardForm &&
+         <div className="add-new-card-area">
+           <Form.Control
+             size="sm"
+             as ="textarea"
+             rows="3"
+             placeholder="enter title for this card..."
+             className="textarea-enter-new-card"
+             ref={newCardTextAreaRef}
+             value ={ newCardTitle}
+             onChange ={onNewCardTitleChange}
+             onKeyDown={event => (event.key === 'Enter') && addNewCard() }
+           />
+         </div>
+        }
       </div>
       <footer>
-        <div className="footer-actions">
+        {openNewCardForm &&
+           <><Button as={Col} variant="success" size="sm" onClick={addNewCard}>Add card</Button>
+             <span className="cancel-icon" onClick={toggleOpenNewCardForm}>
+               <i className=" fa fa-trash icon" ></i>
+             </span></>
+
+        }
+        {!openNewCardForm &&
+        <div className="footer-actions" onClick ={toggleOpenNewCardForm}>
           <i className=" fa fa-plus icon"> </i> Add another card
         </div>
+        }
 
       </footer>
 
@@ -128,7 +210,7 @@ function Column(props) {
         show ={showConfirmModal}
         onAction={onConfirmModalAction}
         title="Remove columns"
-        content={`Are you sure uou want to remove<strong> ${column.title}! </strong> <br> All related cards wwill also be removed!`}
+        content={`Are you sure uou want to remove<strong> ${column.title}! </strong> <br> All related cards will also be removed!`}
       />
     </div>
 
