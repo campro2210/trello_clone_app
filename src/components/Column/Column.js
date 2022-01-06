@@ -85,9 +85,7 @@ function Column(props) {
         onUpdateColumnState(updatedColumn)
       })
     }
-    
-    
-   
+
   }
 
   const addNewCard = () => {
@@ -110,29 +108,6 @@ function Column(props) {
       toggleOpenNewCardForm()
     })
     
-
-
-  }
-
-  const addNewCard = () => {
-    if (!newCardTitle) {
-      newCardTextAreaRef.current.focus()
-      return
-    }
-    const newCardToAdd = {
-      id: Math.random().toString(36).substr(2, 5), // 5 random characters, will remove wwhen we implement code api
-      boardId: column.boardId,
-      title: newCardTitle.trim(),
-      columnId: column.id,
-      cover: null
-    }
-    let newColumn = cloneDeep(column)
-    newColumn.cards.push(newCardToAdd)
-    newColumn.cardOrder.push(newCardToAdd.id)
-
-    onUpdateColumn(newColumn)
-    setNewCardTitle('')
-    toggleOpenNewCardForm()
 
 
   }
