@@ -1,16 +1,116 @@
 @import '_setting.scss';
 
-$appbar-bg-color: #0067a3;
-
-
-
-
+$appbar-bg-color: #004269;
 .navbar-app{
-    height: $navbar-app-height ;
-    background-color: $appbar-bg-color;
-    padding-left: $gap;
+    height: $navbar-app-height*1.3;
+    padding : 0 $gap;
     display: flex;
     align-items: center;
-    font-size: 1.5rem;
+    background-color: $appbar-bg-color;
+    color: aliceblue;
+    .trello-container{
+        max-width: 100%;
+        .app-actions{
+            display:inline-flex;
+            width: 100%;
+            height: 100%;
+            flex-direction: row;
+            align-items: center;    
+            
+            div.item{
+                border-radius: 3px;
+                background-color: rgba(255, 255, 255, 0.3);
+                padding: 6px 10px;
+                &:not(:first-child){
+                    margin-left: 4px;
+                }
+                &:hover{
+                    cursor: pointer;
+                    background-color: rgba(255, 255, 255, 0.4);
+                }
+                &.home{
+                    i{
+                        font-size:15px;
+                    }
+                }
+                &.search{
+                   padding: 0 ;
+                    .group-search{
+                        height:19px;
+                        .input-search{
+                            max-height: 100%;
+                            background-color: inherit;
+                            color: inherit;
+                            border: none;
+                            font-size: 14px;
+                            &::placeholder{
+                                color: darken(aliceblue, 5);
+                                opacity: 1;
+                            }
+                        }
+                        .input-icon-search{
+                            padding: 0 8px 0 0;
+                            background-color:transparent;
+                            border: none;
+                            color: inherit;
+                        }
+                    }
+                }
+            }
+            
+                
+        }    
+        .app-branding{
+            cursor: pointer;
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+            a{
+                color: inherit;
+                &:hover {
+                    text-decoration:none;
+                    color : lighten(aliceblue, 10);
+                }
+            }
+        }
+        .user-actions{
+            display: inline-flex;
+            height:100%;
+            width: 100%;
+            flex-direction: row;
+            align-items: center;
+            justify-content: flex-end;
+            div.item{
+                padding: 6px 10px;
+                background-color: rgba(255, 255, 255, 0.3);
+                border-radius: 3px;
+                &:not(:first-child) {
+                    margin-left: 4px;
+                }
+                &:hover{
+                    cursor: pointer;
+                    background-color: rgba(255, 255, 255, 0.4);
+                }
+                &.user-avt{
+                    padding: 0;
+                    background-color: transparent;
+                    img{
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 50%;
+                        object-fit: cover;
+                        &:hover{
+                            filter: brightness(120%);
+                        }
+                    
+                    }
+                }
+            }
 
+        }
+        
+        
+    }
 }
+
+

@@ -8,8 +8,6 @@ import { MODAL_ACTION_CONFIRM } from 'ultilities/constants'
 import { saveContentAfterPressEnter, selectAllInlineText } from 'ultilities/contentEditable'
 import { createNewCard, updateColumn } from 'actions/callAPI'
 
-
-
 import './Column.scss'
 
 import Card from 'components/Card/Card'
@@ -33,11 +31,10 @@ function Column(props) {
         ...column,
         _destroy:true
       }
-       // Call api
-       updateColumn(newColumn._id, newColumn).then(updatedColumn => {
+      // Call api
+      updateColumn(newColumn._id, newColumn).then(updatedColumn => {
         onUpdateColumnState(updatedColumn)
       })
-   
 
     }
     toggleShowConfirmModal()
@@ -70,15 +67,14 @@ function Column(props) {
   }, [openNewCardForm])
 
 
- // Update column title
+  // Update column title
   const handleColumnTitleBlur =() => {
     const newColumn = {
       ...column,
       title: columnTitle
     }
-    console.log(column.title)
-    console.log(newColumn.title)
-    if(column.title !== newColumn.title) {
+
+    if (column.title !== newColumn.title) {
       // Call api
       updateColumn(newColumn._id, newColumn).then(updatedColumn => {
         updateColumn.cards = newColumn.cards
@@ -102,12 +98,11 @@ function Column(props) {
       let newColumn = cloneDeep(column)
       newColumn.cards.push(card)
       newColumn.cardOrder.push(card._id)
-  
+
       onUpdateColumnState(newColumn)
       setNewCardTitle('')
       toggleOpenNewCardForm()
     })
-    
 
 
   }
